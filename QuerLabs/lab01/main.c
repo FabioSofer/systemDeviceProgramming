@@ -3,9 +3,66 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <pthread.h>
+//EX 8
+struct matData
+{
+  int **A,**B,**C;
+  int i,j,limit;
+};
 
+void *threadFunc(void * arg){
+int i,res=0,a,b;
+struct matData *data=(struct matData *)arg;
+struct matData *new=malloc(sizeof(struct  matData));
+new->A=data->A;
+new->B=data->B;
+new->C=data->C;
+new->limit=data->limit;
+new->i=data->i;
+new->j=data->j;
 
+for(i=0;i<new->limit;i++){
+  a=new->A[new->i][i];
+  b=new->B[i][new->j];
+  res+=a*b;
+}
 
+return (NULL);
+}
+
+void mat_mul (int **A, int **B, int r, int x, int c, int **C);
+
+int main()
+{
+  int A[2][3]={{1,2,3},{4,5,6}};
+  int B[3][2]={{1,1},{1,1},{1,1}};
+  int **C=malloc(sizeof(int)*9);
+ // mat_mul(A,B,2,3,2,C);
+}
+
+void mat_mul (int **A, int **B, int r, int x, int c, int **C){
+  int i,j;
+  pthread_t t[r*c];
+  struct matData myData[r*c];
+  for(i=0;i<r*c;i++){
+    myData[i].A=A;
+    myData[i].B=B;
+    myData[i].C=C;
+    myData[i].limit=x;
+  }
+  
+  for(i=0;i<r;i++){
+    for(j=0;j<c;j++){
+      myData[(i*c)+j].i=i;
+      myData[(i*c)+j].j=j;
+      pthread_create (&t[(i*c)+j], NULL,threadFunc ,(void *) &myData[(i*c)+j]);
+    }
+  }
+  for (i=0;i<r*c;i++)
+     pthread_join (t[i], NULL);
+}
+
+/* EX 7
 struct threadData{
  int curr,max;
  int long *path; 
@@ -49,7 +106,7 @@ int main (int argc,char **argv) {
   pthread_join (tid[0], NULL);
   pthread_join (tid[1], NULL);		
   return (1);
-}
+} */
 
 /* EX 6
 int sig1=0;
